@@ -5,10 +5,10 @@ import GithubLogo from '../assets/github_logo.svg'
 
 import { SIDEBAR_LEFT_PADDING, HEADER_ALLOWANCE } from '../utils/constants'
 import Button from '../Button'
+import Usage from '../patterns/Practice01'
 
 const StyledContainer = styled.section`
-  padding: ${() =>
-    `0 ${SIDEBAR_LEFT_PADDING}vw 0 ${SIDEBAR_LEFT_PADDING * 3}vw`};
+  padding: ${() => `0 ${SIDEBAR_LEFT_PADDING}vw 0 ${SIDEBAR_LEFT_PADDING * 3}vw`};
 `
 const CTAContainer = styled.div`
   margin-top: ${() => `${HEADER_ALLOWANCE}vh`};
@@ -18,9 +18,7 @@ const CTAContainer = styled.div`
 `
 
 const goToGithub = () => {
-  const newWindow = window.open(
-    'https://github.com/ohansemmanuel/advanced-react-patterns-ultrasimplified'
-  )
+  const newWindow = window.open('https://github.com/ohansemmanuel/advanced-react-patterns-ultrasimplified')
   newWindow.opener = null
 }
 
@@ -28,12 +26,9 @@ export const Home = () => (
   <StyledContainer>
     <Hero style={{ width: '90%' }} />
     <CTAContainer>
-      <Button text='Get started' primary />
-      <Button
-        text='Star on Github'
-        Icon={<GithubLogo style={{ width: '18px' }} />}
-        onClick={goToGithub}
-      />
+      {/* <Button text='Get started' primary />
+      <Button text='Star on Github' Icon={<GithubLogo style={{ width: '18px' }} />} onClick={goToGithub} /> */}
+      <Usage />
     </CTAContainer>
   </StyledContainer>
 )

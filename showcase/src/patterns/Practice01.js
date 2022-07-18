@@ -1,21 +1,67 @@
-import React, { Component } from 'react'
+import mojs from 'mo-js'
+import React, { Component, useState } from 'react'
 import styles from './index.css'
 
 // High order component
 const withClapAnimation = (WrappedComponent) => {
   class WithClapAnimation extends Component {
-    animate = () => {
-      console.log('%c Animate', 'background:yellow; color:black')
+    animationTimeline = new mojs.Timeline()
+    state = {
+      animationTimeline: this.animationTimeline,
     }
+
+    componentDidMount() {
+      const tlDuration = 300
+      // first clap animation
+      const scaleButton = new mojs.Html({
+        el: '#clap',
+        duration: tlDuration,
+        scale: { 1.3: 1 },
+        easing: mojs.easing.ease.out,
+      })
+
+      // corrects the first scale render
+      const clap = document.getElementById('clap')
+      clap.style.transform = 'scale(1, 1)'
+
+      // count total
+      const countTotalAnimation = new mojs.Html({
+        el: '#countTotal',
+        opacity: { 0: 1 },
+        delay: (3 * tlDuration) / 2,
+        duration: tlDuration,
+        y: { 0: -3 },
+        easing: mojs.easing.ease.out,
+      })
+
+      // clap count animation
+      const countAnimation = new mojs.Html({
+        el: '#clapCount',
+        opacity: { 0: 1 },
+        y: { 0: -30 },
+        duration: tlDuration,
+      }).then({
+        // mojs return a thenable obj, so we can chain like this
+        // to perform animation after the initial animation
+        opacity: { 1: 0 },
+        y: -80,
+        delay: tlDuration / 2,
+      })
+
+      // add animation to pool
+      const newAnimationTimeline = this.animationTimeline.add([scaleButton, countTotalAnimation, countAnimation])
+      this.setState({ animationTimeline: newAnimationTimeline })
+    }
+
     render() {
-      return <WrappedComponent {...this.props} animate={this.animate} />
+      return <WrappedComponent {...this.props} animationTimeline={this.state.animationTimeline} />
     }
   }
 
   return WithClapAnimation
 }
 
-const MediumClap = ({ animate }) => {
+const MediumClap = ({ animationTimeline }) => {
   const MAXIMUM_USER_CLAP = 50
   const initialState = {
     count: 0,
@@ -26,7 +72,7 @@ const MediumClap = ({ animate }) => {
   const { count, countTotal, isClicked } = clapState
 
   const handleClapClick = () => {
-    animate()
+    animationTimeline.replay()
     setClapState((prev) => ({
       count: Math.min(prev.count + 1, MAXIMUM_USER_CLAP),
       countTotal: count < MAXIMUM_USER_CLAP ? prev.countTotal + 1 : prev.countTotal,
@@ -35,7 +81,7 @@ const MediumClap = ({ animate }) => {
   }
 
   return (
-    <button className={styles.clap} onClick={handleClapClick}>
+    <button id='clap' className={styles.clap} onClick={handleClapClick}>
       <ClapIcon isClicked={isClicked} />
       <ClapCount count={count} />
       <CountTotal countTotal={countTotal} />
@@ -62,11 +108,19 @@ const ClapIcon = ({ isClicked }) => {
 }
 
 const ClapCount = ({ count }) => {
-  return <span className={styles.count}>+{count}</span>
+  return (
+    <span id='clapCount' className={styles.count}>
+      +{count}
+    </span>
+  )
 }
 
 const CountTotal = ({ countTotal }) => {
-  return <span className={styles.total}>{countTotal}</span>
+  return (
+    <span id='countTotal' className={styles.total}>
+      {countTotal}
+    </span>
+  )
 }
 
 // export default MediumClap
@@ -76,3 +130,5 @@ const Usage = () => {
   const AnimatedMediumClap = withClapAnimation(MediumClap)
   return <AnimatedMediumClap />
 }
+
+export default Usage
