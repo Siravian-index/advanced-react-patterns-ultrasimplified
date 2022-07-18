@@ -1,9 +1,9 @@
 import mojs from 'mo-js'
-import React, { Component, useEffect, useState } from 'react'
+import React, { Component, useCallback, useEffect, useState } from 'react'
 import styles from './index.css'
 
 // Custom Hook for animation
-const useClapAnimation = () => {
+const useClapAnimation = ({ clapEl, countEl, totalEl }) => {
   const [animationTimeline, setAnimationTimeline] = useState(() => new mojs.Timeline())
 
   // animation
@@ -11,19 +11,22 @@ const useClapAnimation = () => {
     const tlDuration = 300
     // first clap animation
     const scaleButton = new mojs.Html({
-      el: '#clap',
+      el: clapEl,
       duration: tlDuration,
       scale: { 1.3: 1 },
       easing: mojs.easing.ease.out,
     })
 
     // corrects the first scale render
-    const clap = document.getElementById('clap')
-    clap.style.transform = 'scale(1, 1)'
-
+    if (typeof clapEl === 'string') {
+      const clap = document.getElementById('clap')
+      clap.style.transform = 'scale(1,1)'
+    } else {
+      clapEl.style.transform = 'scale(1,1)'
+    }
     // count total
     const countTotalAnimation = new mojs.Html({
-      el: '#countTotal',
+      el: totalEl,
       opacity: { 0: 1 },
       delay: (3 * tlDuration) / 2,
       duration: tlDuration,
@@ -33,7 +36,7 @@ const useClapAnimation = () => {
 
     // clap count animation
     const countAnimation = new mojs.Html({
-      el: '#clapCount',
+      el: countEl,
       opacity: { 0: 1 },
       y: { 0: -30 },
       duration: tlDuration,
@@ -47,7 +50,7 @@ const useClapAnimation = () => {
 
     // triangle burst
     const triangleBurst = new mojs.Burst({
-      parent: '#clap',
+      parent: clapEl,
       radius: { 50: 95 },
       count: 5,
       angle: 30,
@@ -65,7 +68,7 @@ const useClapAnimation = () => {
     })
 
     const circleBurst = new mojs.Burst({
-      parent: '#clap',
+      parent: clapEl,
       radius: { 50: 75 },
       angle: 25,
       // duration: tlDuration,
@@ -104,9 +107,15 @@ const MediumClap = () => {
     countTotal: 270,
     isClicked: false,
   }
-  const [clapState, setClapState] = useState(initialState)
-  const animationTimeline = useClapAnimation()
-  const { count, countTotal, isClicked } = clapState
+  const [{ count, countTotal, isClicked }, setClapState] = useState(initialState)
+  // refs to apply animation
+  const [{ clapRef, clapCountRef, clapTotalRef }, setRefState] = useState({})
+  const setRef = useCallback((node) => {
+    // save state to refState
+    setRefState((prev) => ({ ...prev, [node.dataset.keyRef]: node }))
+  }, [])
+
+  const animationTimeline = useClapAnimation({ clapEl: clapRef, countEl: clapCountRef, totalEl: clapTotalRef })
 
   const handleClapClick = () => {
     animationTimeline.replay()
@@ -118,10 +127,10 @@ const MediumClap = () => {
   }
 
   return (
-    <button id='clap' className={styles.clap} onClick={handleClapClick}>
+    <button ref={setRef} data-keyRef='clapRef' className={styles.clap} onClick={handleClapClick}>
       <ClapIcon isClicked={isClicked} />
-      <ClapCount count={count} />
-      <CountTotal countTotal={countTotal} />
+      <ClapCount count={count} setRef={setRef} />
+      <CountTotal countTotal={countTotal} setRef={setRef} />
     </button>
   )
 }
@@ -132,7 +141,6 @@ const ClapIcon = ({ isClicked }) => {
   return (
     <span>
       <svg
-        id='clapIcon'
         xmlns='http://www.w3.org/2000/svg'
         viewBox='-549 338 100.1 125'
         className={`${styles.icon} ${isClicked && styles.checked}`}
@@ -144,25 +152,23 @@ const ClapIcon = ({ isClicked }) => {
   )
 }
 
-const ClapCount = ({ count }) => {
+const ClapCount = ({ count, setRef }) => {
   return (
-    <span id='clapCount' className={styles.count}>
+    <span ref={setRef} data-keyRef='clapCountRef' className={styles.count}>
       +{count}
     </span>
   )
 }
 
-const CountTotal = ({ countTotal }) => {
+const CountTotal = ({ countTotal, setRef }) => {
   return (
-    <span id='countTotal' className={styles.total}>
+    <span ref={setRef} data-keyRef='clapTotalRef' className={styles.total}>
       {countTotal}
     </span>
   )
 }
 
-// export default MediumClap
-
-// Usage
+Usage
 const Usage = () => {
   return <MediumClap />
 }
