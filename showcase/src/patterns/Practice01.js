@@ -1,7 +1,21 @@
-import React from 'react'
+import React, { Component } from 'react'
 import styles from './index.css'
 
-const MediumClap = () => {
+// High order component
+const withClapAnimation = (WrappedComponent) => {
+  class WithClapAnimation extends Component {
+    animate = () => {
+      console.log('%c Animate', 'background:yellow; color:black')
+    }
+    render() {
+      return <WrappedComponent {...this.props} animate={this.animate} />
+    }
+  }
+
+  return WithClapAnimation
+}
+
+const MediumClap = ({ animate }) => {
   const MAXIMUM_USER_CLAP = 50
   const initialState = {
     count: 0,
@@ -12,6 +26,7 @@ const MediumClap = () => {
   const { count, countTotal, isClicked } = clapState
 
   const handleClapClick = () => {
+    animate()
     setClapState((prev) => ({
       count: Math.min(prev.count + 1, MAXIMUM_USER_CLAP),
       countTotal: count < MAXIMUM_USER_CLAP ? prev.countTotal + 1 : prev.countTotal,
@@ -54,4 +69,10 @@ const CountTotal = ({ countTotal }) => {
   return <span className={styles.total}>{countTotal}</span>
 }
 
-export default MediumClap
+// export default MediumClap
+
+// Usage
+const Usage = () => {
+  const AnimatedMediumClap = withClapAnimation(MediumClap)
+  return <AnimatedMediumClap />
+}
