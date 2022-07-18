@@ -26,9 +26,8 @@ export const Home = () => (
   <StyledContainer>
     <Hero style={{ width: '90%' }} />
     <CTAContainer>
-      {/* <Button text='Get started' primary />
-      <Button text='Star on Github' Icon={<GithubLogo style={{ width: '18px' }} />} onClick={goToGithub} /> */}
-      <Usage />
+      <Button text='Get started' primary />
+      <Button text='Star on Github' Icon={<GithubLogo style={{ width: '18px' }} />} onClick={goToGithub} />
     </CTAContainer>
   </StyledContainer>
 )
