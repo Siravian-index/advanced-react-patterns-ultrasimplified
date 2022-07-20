@@ -1,5 +1,5 @@
 import mojs from 'mo-js'
-import React, { Component, useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useLayoutEffect, useState } from 'react'
 import styles from './index.css'
 
 // Custom Hook for animation
@@ -7,7 +7,11 @@ const useClapAnimation = ({ clapEl, countEl, totalEl }) => {
   const [animationTimeline, setAnimationTimeline] = useState(() => new mojs.Timeline())
 
   // animation
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // prevent useEffect to continue with empty values
+    // early return to avoid null pointer exception
+    if (!(clapEl && countEl && totalEl)) return
+
     const tlDuration = 300
     // first clap animation
     const scaleButton = new mojs.Html({
@@ -95,7 +99,8 @@ const useClapAnimation = ({ clapEl, countEl, totalEl }) => {
     ])
 
     setAnimationTimeline(newAnimationTimeline)
-  }, [])
+    // set elements as dependencies to re call the hook once they are load with data
+  }, [clapEl, countEl, totalEl])
 
   return animationTimeline
 }
@@ -111,8 +116,7 @@ const MediumClap = () => {
   // refs to apply animation
   const [{ clapRef, clapCountRef, clapTotalRef }, setRefState] = useState({})
   const setRef = useCallback((node) => {
-    // save state to refState
-    setRefState((prev) => ({ ...prev, [node.dataset.keyRef]: node }))
+    setRefState((prev) => ({ ...prev, [node.dataset.keyref]: node }))
   }, [])
 
   const animationTimeline = useClapAnimation({ clapEl: clapRef, countEl: clapCountRef, totalEl: clapTotalRef })
@@ -127,7 +131,7 @@ const MediumClap = () => {
   }
 
   return (
-    <button ref={setRef} data-keyRef='clapRef' className={styles.clap} onClick={handleClapClick}>
+    <button ref={setRef} data-keyref='clapRef' className={styles.clap} onClick={handleClapClick}>
       <ClapIcon isClicked={isClicked} />
       <ClapCount count={count} setRef={setRef} />
       <CountTotal countTotal={countTotal} setRef={setRef} />
@@ -154,7 +158,7 @@ const ClapIcon = ({ isClicked }) => {
 
 const ClapCount = ({ count, setRef }) => {
   return (
-    <span ref={setRef} data-keyRef='clapCountRef' className={styles.count}>
+    <span ref={setRef} data-keyref='clapCountRef' className={styles.count}>
       +{count}
     </span>
   )
@@ -162,7 +166,7 @@ const ClapCount = ({ count, setRef }) => {
 
 const CountTotal = ({ countTotal, setRef }) => {
   return (
-    <span ref={setRef} data-keyRef='clapTotalRef' className={styles.total}>
+    <span ref={setRef} data-keyref='clapTotalRef' className={styles.total}>
       {countTotal}
     </span>
   )
