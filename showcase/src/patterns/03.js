@@ -1,5 +1,14 @@
 import mojs from 'mo-js'
-import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import styles from './index.css'
 
 // Custom Hook for animation
@@ -124,8 +133,16 @@ const MediumClap = ({ children, onClap }) => {
 
   const animationTimeline = useClapAnimation({ clapEl: clapRef, countEl: clapCountRef, totalEl: clapTotalRef })
 
+  // used to prevent initial call
+  const componentJustMounted = useRef(true)
+  // lifting state up
   useEffect(() => {
-    onClap && onClap(clapState)
+    // prevents initial call
+    if (!componentJustMounted.current) {
+      onClap && onClap(clapState)
+    }
+    // useRef does not trigger re-renders
+    componentJustMounted.current = false
   }, [count])
 
   const handleClapClick = () => {
