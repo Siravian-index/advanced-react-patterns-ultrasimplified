@@ -116,7 +116,7 @@ const useClapAnimation = ({ clapEl, countEl, totalEl }) => {
 
 const MediumClapContext = createContext()
 const { Provider } = MediumClapContext
-const MediumClap = ({ children, onClap }) => {
+const MediumClap = ({ children, onClap, style: userStyles = {} }) => {
   const MAXIMUM_USER_CLAP = 50
   const initialState = {
     count: 0,
@@ -157,7 +157,7 @@ const MediumClap = ({ children, onClap }) => {
   const memoizedValue = useMemo(() => ({ ...clapState, setRef }), [setRef, clapState])
   return (
     <Provider value={memoizedValue}>
-      <button ref={setRef} data-keyref='clapRef' className={styles.clap} onClick={handleClapClick}>
+      <button ref={setRef} data-keyref='clapRef' className={styles.clap} onClick={handleClapClick} style={userStyles}>
         {children}
       </button>
     </Provider>
@@ -165,11 +165,12 @@ const MediumClap = ({ children, onClap }) => {
 }
 
 // subcomponents
-const ClapIcon = () => {
+const ClapIcon = ({ style: userStyles = {} }) => {
   const { isClicked } = useContext(MediumClapContext)
   return (
     <span>
       <svg
+        style={userStyles}
         xmlns='http://www.w3.org/2000/svg'
         viewBox='-549 338 100.1 125'
         className={`${styles.icon} ${isClicked && styles.checked}`}
@@ -181,19 +182,19 @@ const ClapIcon = () => {
   )
 }
 
-const ClapCount = () => {
+const ClapCount = ({ style: userStyles = {} }) => {
   const { count, setRef } = useContext(MediumClapContext)
   return (
-    <span ref={setRef} data-keyref='clapCountRef' className={styles.count}>
+    <span ref={setRef} data-keyref='clapCountRef' className={styles.count} style={userStyles}>
       +{count}
     </span>
   )
 }
 
-const CountTotal = () => {
+const CountTotal = ({ style: userStyles = {} }) => {
   const { countTotal, setRef } = useContext(MediumClapContext)
   return (
-    <span ref={setRef} data-keyref='clapTotalRef' className={styles.total}>
+    <span ref={setRef} data-keyref='clapTotalRef' className={styles.total} style={userStyles}>
       {countTotal}
     </span>
   )
@@ -209,7 +210,7 @@ const Usage = () => {
     setCount(clapState.count)
   }
   return (
-    <div>
+    <div style={{}}>
       <MediumClap onClap={handleClap}>
         <MediumClap.Icon />
         <MediumClap.Count />
